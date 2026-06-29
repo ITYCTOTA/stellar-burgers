@@ -1,31 +1,57 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '@utils-types';
+import { TIngredient, TOrder } from '@utils-types';
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  selectFeedOrders,
+  selectIngredients,
+  selectSelectedOrder,
+  selectUserOrders
+} from '../../services/selectors';
+import {
+  clearSelectedOrder,
+  fetchOrderByNumber
+} from '../../services/slices/orderSlice';
+
+type TIngredientsWithCount = {
+  [key: string]: TIngredient & { count: number };
+};
+
+type TOrderInfo = TOrder & {
+  ingredientsInfo: TIngredientsWithCount;
+  date: Date;
+  total: number;
+};
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const dispatch = useDispatch();
+  const { number } = useParams();
+  const orderNumber = Number(number);
+  const selectedOrder = useSelector(selectSelectedOrder);
+  const feedOrders = useSelector(selectFeedOrders);
+  const userOrders = useSelector(selectUserOrders);
+  const ingredients = useSelector(selectIngredients);
 
-  const ingredients: TIngredient[] = [];
+  const orderData =
+    feedOrders.find((order) => order.number === orderNumber) ||
+    userOrders.find((order) => order.number === orderNumber) ||
+    (selectedOrder?.number === orderNumber ? selectedOrder : null);
 
-  /* Готовим данные для отображения */
-  const orderInfo = useMemo(() => {
+  useEffect(() => {
+    if (!orderData && Number.isFinite(orderNumber)) {
+      dispatch(fetchOrderByNumber(orderNumber));
+    }
+    return () => {
+      dispatch(clearSelectedOrder());
+    };
+  }, [dispatch, orderData, orderNumber]);
+
+  const orderInfo = useMemo<TOrderInfo | null>(() => {
     if (!orderData || !ingredients.length) return null;
 
     const date = new Date(orderData.createdAt);
-
-    type TIngredientsWithCount = {
-      [key: string]: TIngredient & { count: number };
-    };
 
     const ingredientsInfo = orderData.ingredients.reduce(
       (acc: TIngredientsWithCount, item) => {
