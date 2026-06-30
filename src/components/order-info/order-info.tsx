@@ -10,10 +10,7 @@ import {
   selectSelectedOrder,
   selectUserOrders
 } from '../../services/selectors';
-import {
-  clearSelectedOrder,
-  fetchOrderByNumber
-} from '../../services/slices/orderSlice';
+import { fetchOrderByNumber } from '../../services/slices/orderSlice';
 
 type TIngredientsWithCount = {
   [key: string]: TIngredient & { count: number };
@@ -43,9 +40,6 @@ export const OrderInfo: FC = () => {
     if (!orderData && Number.isFinite(orderNumber)) {
       dispatch(fetchOrderByNumber(orderNumber));
     }
-    return () => {
-      dispatch(clearSelectedOrder());
-    };
   }, [dispatch, orderData, orderNumber]);
 
   const orderInfo = useMemo<TOrderInfo | null>(() => {
