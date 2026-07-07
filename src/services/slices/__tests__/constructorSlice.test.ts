@@ -70,10 +70,7 @@ describe('constructorSlice', () => {
   });
 
   test('добавляет булку в constructor.bun', () => {
-    const result = constructorReducer(
-      undefined,
-      addIngredient(bun)
-    );
+    const result = constructorReducer(undefined, addIngredient(bun));
 
     expect(result.bun).toEqual({
       ...bun,
@@ -83,10 +80,7 @@ describe('constructorSlice', () => {
   });
 
   test('добавляет ингредиент в список начинки', () => {
-    const result = constructorReducer(
-      undefined,
-      addIngredient(mainIngredient)
-    );
+    const result = constructorReducer(undefined, addIngredient(mainIngredient));
 
     expect(result.bun).toBeNull();
     expect(result.ingredients).toEqual([
